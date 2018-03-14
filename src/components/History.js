@@ -15,6 +15,8 @@ const bountyImgStyle = {
   width: '20px'
 };
 
+const ENTER_KEY = 13;
+
 function BountyItem({item}) {
   return (
     <tr>
@@ -78,10 +80,13 @@ export class History extends Component {
       bounties: [],
       browserLocation: null,
       githubUsername: null,
-      keyword: undefined,
+      keyword: '',
       loading: true,
       fetchError: null
     }
+    this.handleClick = this.handleClick.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   componentDidMount() {
@@ -122,12 +127,33 @@ export class History extends Component {
       });
   }
 
+  handleClick(e) {
+    e.preventDefault();
+    switch(e.target.id) {
+      case 'search-button':
+        let { keyword } = this.state;
+        this.searchBounties(keyword);
+        break;
+    }
+  }
+
+  handleChange(e) {
+    this.setState({keyword: e.target.value});
+  }
+
+  handleKeyDown(e) {
+    if (e.keyCode === ENTER_KEY) {
+      let { keyword } = this.state
+      this.searchBounties(keyword);
+    }
+  }
+
   searchBounties(keyword) {
     keyword = keyword.toLowerCase();
     var matching_bounties = [];
     var all_bounties = this.state.bounties;
     for (var i = all_bounties.length - 1; i >= 0; i--) {
-      var bounty_keywords = JSON.parse(all_bounties[i].raw_data[8]).issueKeywords.toLowerCase();
+      var bounty_keywords = all_bounties[i].metadata.issueKeywords.toLowerCase();
       var bounty_title = all_bounties[i].title.toLowerCase();
       var do_keywords_contain = bounty_keywords.indexOf(keyword) !== -1;
       var does_title_contain = bounty_title.indexOf(keyword) !== -1;
@@ -151,8 +177,8 @@ export class History extends Component {
             <a target='_blank' href={href} rel='noopener noreferrer' className='btn btn-sm btn-primary js-details-target gitcoin_button'>+ Fund Issue</a>
         </div>
         <h5>Funded Issues</h5>
-        <input type='text' id='search_bar' value={this.state.keyword} placeholder='Search for keywords..' />
-        <button style={searchBtnStyle} className='btn btn-sm btn-primary js-details-target gitcoin_button search-button'>Search</button>
+        <input type='text' id='search_bar' value={this.state.keyword} placeholder='Search for keywords..' onChange={this.handleChange} onKeyDown={this.handleKeyDown} />
+        <button id="search-button" style={searchBtnStyle} onClick={this.handleClick} className='btn btn-sm btn-primary js-details-target gitcoin_button'>Search</button>
         <table className='table table-striped' id='openbounties'>
           <thead>
             <tr>
