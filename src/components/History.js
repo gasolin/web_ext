@@ -97,12 +97,12 @@ export class History extends Component {
 
     if (isOnGitHubcom && isOnRepo) {
       var repo = url.split('/')[4];
-      this.searchBounties(repo);
+      this.filterBounties(repo);
     }
 
     if (keyword) {
       this.setState({keyword});
-      this.searchBounties(keyword);
+      this.filterBounties(keyword);
     }
 
     if(localStorage['githubusername']) {
@@ -113,7 +113,7 @@ export class History extends Component {
     }
 
     let fetchUrl = DEVELOPMENT ? '/mock.json' :
-      BOUNTIES_BASE_URL + 'idx_status=open&order_by=-web3_created';
+      BOUNTIES_BASE_URL + 'idx_status=open&order_by=web3_created&network=mainnet';
     fetch(fetchUrl)
       .then(res => res.json())
       .then(data => {
@@ -129,11 +129,9 @@ export class History extends Component {
 
   handleClick(e) {
     e.preventDefault();
-    switch(e.target.id) {
-      case 'search-button':
-        let { keyword } = this.state;
-        this.searchBounties(keyword);
-        break;
+    if (e.target.id === 'search-button') {
+      let { keyword } = this.state;
+      this.filterBounties(keyword);
     }
   }
 
@@ -144,11 +142,11 @@ export class History extends Component {
   handleKeyDown(e) {
     if (e.keyCode === ENTER_KEY) {
       let { keyword } = this.state
-      this.searchBounties(keyword);
+      this.filterBounties(keyword);
     }
   }
 
-  searchBounties(keyword) {
+  filterBounties(keyword) {
     keyword = keyword.toLowerCase();
     var matching_bounties = [];
     var all_bounties = this.state.bounties;
@@ -179,7 +177,7 @@ export class History extends Component {
         <h5>Funded Issues</h5>
         <input type='text' id='search_bar' value={this.state.keyword} placeholder='Search for keywords..' onChange={this.handleChange} onKeyDown={this.handleKeyDown} />
         <button id="search-button" style={searchBtnStyle} onClick={this.handleClick} className='btn btn-sm btn-primary js-details-target gitcoin_button'>Search</button>
-        <table className='table table-striped' id='openbounties'>
+        <table className='table table-striped table-sm' id='openbounties'>
           <thead>
             <tr>
               <th></th>
