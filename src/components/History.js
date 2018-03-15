@@ -24,7 +24,6 @@ function BountyItem({item}) {
       <td>{item.timeDiff}</td>
       <td>{item.tokenName}</td>
       <td>{item.title}</td>
-      <td>{item.tokenName}</td>
       <td>{item.state}</td>
       <td><a href={item.linkUrl} target= '_blank' className='target' rel='noopener noreferrer'>'View >></a></td>
     </tr>
@@ -77,6 +76,7 @@ export class History extends Component {
   constructor() {
     super();
     this.state = {
+      allBounties: [],
       bounties: [],
       browserLocation: null,
       githubUsername: null,
@@ -118,6 +118,7 @@ export class History extends Component {
       .then(res => res.json())
       .then(data => {
         this.setState({
+          allBounties: data,
           bounties: data,
           loading: false
         });
@@ -147,17 +148,21 @@ export class History extends Component {
   }
 
   filterBounties(keyword) {
-    keyword = keyword.toLowerCase();
-    var matching_bounties = [];
-    var all_bounties = this.state.bounties;
-    for (var i = all_bounties.length - 1; i >= 0; i--) {
-      var bounty_keywords = all_bounties[i].metadata.issueKeywords.toLowerCase();
-      var bounty_title = all_bounties[i].title.toLowerCase();
-      var do_keywords_contain = bounty_keywords.indexOf(keyword) !== -1;
-      var does_title_contain = bounty_title.indexOf(keyword) !== -1;
-      if (do_keywords_contain || does_title_contain) {
-        matching_bounties.push(all_bounties[i]);
-        localStorage.setItem('keyword', keyword);
+    keyword = keyword.trim().toLowerCase();
+    let matching_bounties = [];
+    if (keyword.length === 0) {
+      matching_bounties = this.state.allBounties;
+    } else {
+      let all_bounties = this.state.allBounties;
+      for (let i = all_bounties.length - 1; i >= 0; i--) {
+        let bounty_keywords = all_bounties[i].metadata.issueKeywords.toLowerCase();
+        let bounty_title = all_bounties[i].title.toLowerCase();
+        let do_keywords_contain = bounty_keywords.indexOf(keyword) !== -1;
+        let does_title_contain = bounty_title.indexOf(keyword) !== -1;
+        if (do_keywords_contain || does_title_contain) {
+          matching_bounties.push(all_bounties[i]);
+          localStorage.setItem('keyword', keyword);
+        }
       }
     }
     this.setState({
